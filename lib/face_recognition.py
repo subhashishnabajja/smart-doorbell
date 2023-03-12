@@ -44,7 +44,7 @@ class FaceRecognition:
             self.known_face_names.append(image)
         print(self.known_face_names)
 
-    def run_recognition(self, onMatchFound = None, cancelButton = None):
+    def run_recognition(self, onMatchFound = None, cancelButton = None, onCancel=None):
         session_end = False
 
         start_time = time.perf_counter()
@@ -87,14 +87,17 @@ class FaceRecognition:
                         if name in os.listdir(FACES_PATH):
                             onMatchFound(name)
                             session_end = True
+                            video_capture.release()
+                            cv2.destroyAllWindows()
+                            return True
+                            
                            
 
                     self.face_names.append(f'{name} ({confidence})')
 
             self.process_current_frame = not self.process_current_frame
-            
-            if cancelButton.value == 1:
-                session_end = True
+        
+             
             
             # Display the results
             for (top, right, bottom, left), name in zip(self.face_locations, self.face_names):
@@ -112,6 +115,10 @@ class FaceRecognition:
             # Display the resulting image
             cv2.imshow('Face Recognition', frame)
 
+                
+            if cancelButton.value == 1:
+                session_end = True
+
             # Hit 'q' on the keyboard to quit!
             if (cv2.waitKey(1) == ord('q')) or session_end or (time.perf_counter() - start_time) >= 10:
                 break
@@ -120,4 +127,5 @@ class FaceRecognition:
 
         video_capture.release()
         cv2.destroyAllWindows()
+        return False
 

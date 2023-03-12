@@ -2,6 +2,7 @@ import threading
 import random
 import string
 import time
+import simpleaudio as sa
 
 # User libraries
 from lib.max7219.matrix import LedMatrix
@@ -13,6 +14,9 @@ def generate_string(length: int):
 
 class Pattern:
     def __init__(self, pin: str, display:LedMatrix):
+        self.access_granted_sound = sa.WaveObject.from_wave_file("./static/access_granted.wav") # Bell sound
+
+
         self.STATE = "IDLE"  # Track the state of the pattern machine
         self.display = display
         self.pin = pin  # Store the user entered pin
@@ -79,7 +83,7 @@ class Pattern:
 
         self.get_current_password()  # Print the updated password
         self.display.setBitmap(CONSTANTS.FRAME_ARROW_DOWN)
-        time.sleep(2)
+        time.sleep(0.25)
         self.update_display()  # Print the updated password
 
     def up(self):
@@ -92,7 +96,7 @@ class Pattern:
 
         self.get_current_password()  # Print the updated password
         self.display.setBitmap(CONSTANTS.FRAME_ARROW_UP)
-        time.sleep(0.75)
+        time.sleep(0.25)
         self.update_display()  # Print the updated password
 
     def right(self):
@@ -111,8 +115,9 @@ class Pattern:
         # Update the saved locations
 
         self.get_current_password()  # Print the updated password
+       
         self.display.setBitmap(CONSTANTS.FRAME_ARROW_RIGHT)
-        time.sleep(0.75)
+        time.sleep(0.25)
         self.update_display() 
 
     def left(self):
@@ -128,18 +133,19 @@ class Pattern:
 
         self.get_current_password()  # Print the updated password
         self.display.setBitmap(CONSTANTS.FRAME_ARROW_LEFT)
-        time.sleep(0.75)
+        time.sleep(0.25)
         self.update_display() 
 
     def check_password(self):
         if self.tries >= 3:
-            self.display.show("Please try again", delay=.5)
+            self.display.show("Please try again", delay=.75)
 
             return self.end_session()
         if "".join(self.get_current_password()) == self.pin:
-            self.display.show("Access granted")
+            self.access_granted_sound.play()
+            self.display.show("Access granted", delay=0.25)
             self.display.setBitmap(CONSTANTS.FRAME_TICK)
-            time.sleep(0.75)
+            time.sleep(0.25)
             self.end_session()
         else:
             print("Access denied")
